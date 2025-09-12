@@ -1,67 +1,86 @@
 import asyncio
-import streamlit as st
+import json
+from enum import Enum
+from flask import Flask, render_template, request, jsonify
 
-# We need to import the core graph
+# Import your main fact-checking graph
 from fact_checker.agent import graph
 
-st.set_page_config(
-    page_title="Fact Checker AI",
-    page_icon="🔍",
-    layout="wide",
-)
+# Helper class to correctly convert the final report to JSON
+class EnumEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Enum):
+            return obj.value
+        return super().default(obj)
 
-st.title("Fact Checker AI")
-st.markdown("Enter a statement or text below, and the AI will analyze and fact-check it.")
+# Initialize Flask to find your frontend files
+app = Flask(__name__, template_folder='templates', static_folder='static')
+app.json_encoder = EnumEncoder
 
-# Get user input
-user_input = st.text_area("Enter text to fact-check:", height=200)
+
+@app.route('/')
+def index():
+    """Renders the main HTML page."""
+    return render_template('index.html')
+
+@app.route('/fact-check', methods=['POST'])
+def fact_check():
+    """Handles the API request from the frontend's JavaScript."""
+    try:
+        data = request.get_json()
+        text = data.get('text', '').strip()
+        
+        if not text:
+            return jsonify({'error': 'Please provide text to analyze.'}), 400
+        
+        # Runs your entire asynchronous fact-checking pipeline
+        final_state = asyncio.run(run_agent(text))
+        
+        final_report = final_state.get("final_report")
+        
+        if not final_report:
+            return jsonify({'error': 'Failed to generate a complete report.'}), 500
+        
+        # Converts your final report into a JSON-friendly format for the frontend
+        response_data = {
+            'summary': final_report.summary,
+            'verified_claims': [claim.dict() for claim in final_report.verified_claims],
+            'stats': calculate_stats(final_report.verified_claims)
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 async def run_agent(text):
-    """Run the LangGraph agent asynchronously."""
-    inputs = {"answer": text}
-    # This will run the entire graph and return the final state
+    """Wrapper to run your async LangGraph agent."""
+    # --- THIS IS THE ONE-WORD FIX ---
+    # The graph expects the input key to be 'answer'.
+    inputs = {"answer": text} 
     final_state = await graph.ainvoke(inputs)
     return final_state
 
-if st.button("Fact-Check"):
-    if not user_input.strip():
-        st.warning("Please enter some text to analyze.")
-    else:
-        with st.spinner("Analyzing... This may take a moment."):
-            try:
-                # Use asyncio.run to run the async function
-                final_state = asyncio.run(run_agent(user_input))
-                
-                # Retrieve the final report from the state
-                final_report = final_state.get("final_report")
+def calculate_stats(verified_claims):
+    """Calculates the statistics for the final report."""
+    if not verified_claims:
+        return {'supported': 0, 'refuted': 0, 'insufficient': 0, 'conflicting': 0}
+    
+    total = len(verified_claims)
+    results = [claim.result for claim in verified_claims]
+    
+    supported_count = sum(1 for r in results if r.value == 'Supported')
+    refuted_count = sum(1 for r in results if r.value == 'Refuted')
+    insufficient_count = sum(1 for r in results if r.value == 'Insufficient Information')
+    conflicting_count = sum(1 for r in results if r.value == 'Conflicting')
 
-                if final_report:
-                    st.success("Fact-Check Complete!")
-                    
-                    st.header("Overall Verdict")
-                    st.write(final_report.summary)
-                    
-                    st.header("Individual Claims")
-                    
-                    for i, verdict in enumerate(final_report.verified_claims):
-                        with st.expander(f"Claim {i+1}: {verdict.result} - {verdict.claim_text}"):
-                            st.subheader("Reasoning")
-                            st.write(verdict.reasoning)
-                            
-                            st.subheader("Sources")
-                            if verdict.sources:
-                                for source in verdict.sources:
-                                    if source.is_influential:
-                                        st.markdown(f"**🔗 {source.title or 'Source'}:** [{source.url}]({source.url})")
-                                        st.markdown(f"**Snippet:** {source.text[:200]}...")
-                                    else:
-                                        st.markdown(f"**🔗 {source.title or 'Source'}:** [{source.url}]({source.url})")
-                            else:
-                                st.warning("No sources were found for this claim.")
+    return {
+        'supported': round((supported_count / total) * 100, 1) if total > 0 else 0,
+        'refuted': round((refuted_count / total) * 100, 1) if total > 0 else 0,
+        'insufficient': round((insufficient_count / total) * 100, 1) if total > 0 else 0,
+        'conflicting': round((conflicting_count / total) * 100, 1) if total > 0 else 0
+    }
 
-                else:
-                    st.error("Failed to generate a complete report. Please try again.")
-
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
-                st.info("Please make sure you have set up your API keys in the `.env` file.")
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

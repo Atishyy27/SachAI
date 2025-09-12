@@ -94,13 +94,18 @@ async def search_decision_node(
         )
         return Command(goto="evaluate_evidence")
 
+    # assessment = IntermediateAssessment(
+    #     needs_more_evidence=response.needs_more_evidence,
+    #     missing_aspects=response.missing_aspects,
+    # )
     assessment = IntermediateAssessment(
-        needs_more_evidence=response.needs_more_evidence,
-        missing_aspects=response.missing_aspects,
+        needs_more_evidence=response.get("needs_more_evidence", False),
+        missing_aspects=response.get("missing_aspects", []),
     )
 
     # Decision logic based on LLM assessment
-    should_continue = response.needs_more_evidence and iteration_count < max_iterations
+    # should_continue = response.needs_more_evidence and iteration_count < max_iterations
+    should_continue = response.get("needs_more_evidence", False) and iteration_count < max_iterations
 
     if should_continue:
         logger.info(

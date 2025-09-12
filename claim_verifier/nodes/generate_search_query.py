@@ -33,11 +33,71 @@ class QueryGenerationOutput(BaseModel):
     )
 
 
+# async def generate_search_query_node(
+#     state: ClaimVerifierState,
+# ) -> Dict[str, str]:
+#     """Generate an effective search query for a claim."""
+
+#     claim = state.claim
+#     iteration_count = state.iteration_count
+#     all_queries = state.all_queries
+#     intermediate_assessment = state.intermediate_assessment
+
+#     logger.info(
+#         f"Generating search query for claim: '{claim.claim_text}' "
+#         f"(Iteration: {iteration_count + 1})"
+#     )
+
+#     llm = get_llm()
+
+#     # Build context for iterative searching
+#     context_parts = []
+
+#     if iteration_count > 0 and all_queries:
+#         context_parts.append(f"Previous queries: {', '.join(all_queries)}")
+
+#     if intermediate_assessment and intermediate_assessment.missing_aspects:
+#         context_parts.append(
+#             f"Missing aspects: {', '.join(intermediate_assessment.missing_aspects)}"
+#         )
+
+#     context = " | ".join(context_parts) if context_parts else ""
+
+#     current_time = get_current_timestamp()
+
+#     system_prompt = (
+#         QUERY_GENERATION_INITIAL_SYSTEM_PROMPT.format(current_time=current_time)
+#         if iteration_count == 0
+#         else QUERY_GENERATION_ITERATIVE_SYSTEM_PROMPT.format(
+#             iteration_count=iteration_count + 1,
+#             context=context,
+#             current_time=current_time,
+#         )
+#     )
+#     human_prompt = QUERY_GENERATION_HUMAN_PROMPT.format(claim_text=claim.claim_text)
+#     messages = [("system", system_prompt), ("human", human_prompt)]
+
+#     response = await call_llm_with_structured_output(
+#         llm=llm,
+#         output_class=QueryGenerationOutput,
+#         messages=messages,
+#         context_desc=f"query generation for claim '{claim.claim_text}'",
+#     )
+
+#     # if not response or not response.query:
+#     query = response.get("query") if response else None
+#     if not query:
+#         logger.warning(f"Failed to generate query for claim: '{claim.claim_text}'")
+#         return {"query": claim.claim_text}
+
+#     logger.info(f"Generated search query: {response.query}")
+
+#     return {"query": response.query, "all_queries": all_queries + [response.query]}
+
 async def generate_search_query_node(
     state: ClaimVerifierState,
 ) -> Dict[str, str]:
     """Generate an effective search query for a claim."""
-
     claim = state.claim
     iteration_count = state.iteration_count
     all_queries = state.all_queries
@@ -47,24 +107,16 @@ async def generate_search_query_node(
         f"Generating search query for claim: '{claim.claim_text}' "
         f"(Iteration: {iteration_count + 1})"
     )
-
     llm = get_llm()
-
-    # Build context for iterative searching
     context_parts = []
-
     if iteration_count > 0 and all_queries:
         context_parts.append(f"Previous queries: {', '.join(all_queries)}")
-
     if intermediate_assessment and intermediate_assessment.missing_aspects:
         context_parts.append(
             f"Missing aspects: {', '.join(intermediate_assessment.missing_aspects)}"
         )
-
     context = " | ".join(context_parts) if context_parts else ""
-
     current_time = get_current_timestamp()
-
     system_prompt = (
         QUERY_GENERATION_INITIAL_SYSTEM_PROMPT.format(current_time=current_time)
         if iteration_count == 0
@@ -83,11 +135,13 @@ async def generate_search_query_node(
         messages=messages,
         context_desc=f"query generation for claim '{claim.claim_text}'",
     )
-
-    if not response or not response.query:
+    
+    query = response.get("query") if response else None
+    
+    # --- THIS IS THE CORRECTED PART (ADDED THE COLON) ---
+    if not query:
         logger.warning(f"Failed to generate query for claim: '{claim.claim_text}'")
         return {"query": claim.claim_text}
 
-    logger.info(f"Generated search query: {response.query}")
-
-    return {"query": response.query, "all_queries": all_queries + [response.query]}
+    logger.info(f"Generated search query: {query}")
+    return {"query": query, "all_queries": all_queries + [query]}

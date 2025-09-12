@@ -9,7 +9,7 @@ QUERY_GENERATION_CONFIG = {
 }
 
 EVIDENCE_RETRIEVAL_CONFIG = {
-    "results_per_query": 1,  # Number of search results to fetch per query
+    "results_per_query": 3,  # Number of search results to fetch per query
     "search_provider": "tavily",  # Search provider: "exa" or "tavily"
 }
 

@@ -7,7 +7,8 @@ import asyncio
 import logging
 from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.language_models.chat_models import BaseChatModel
 
 T = TypeVar("T")
@@ -62,30 +63,35 @@ def truncate_evidence_for_token_limit(
 
     return result
 
-
 async def call_llm_with_structured_output(
     llm: BaseChatModel,
     output_class: Type[M],
     messages: List[Tuple[str, str]],
     context_desc: str = "",
 ) -> Optional[M]:
-    """Call LLM with structured output and consistent error handling.
-
-    Args:
-        llm: LLM instance
-        output_class: Pydantic model for structured output
-        messages: Messages to send to the LLM
-        context_desc: Description for error logs
-
-    Returns:
-        Structured output or None if error
+    """
+    Calls the LLM and parses the JSON output into a Pydantic model.
+    This version is compatible with local Ollama models.
     """
     try:
-        return await llm.with_structured_output(output_class).ainvoke(messages)
-    except Exception as e:
-        logger.error(f"Error in LLM call for {context_desc}: {e}")
-        return None
+        # Create a parser for the desired Pydantic class
+        parser = JsonOutputParser(pydantic_object=output_class)
 
+        # Create the chain: prompt -> llm (in json mode) -> parser
+        chain = llm.bind(format="json") | parser
+
+        # Invoke the chain and return the result
+        return await chain.ainvoke(messages)
+
+    except ValidationError as e:
+        logger.error(
+            f"Pydantic validation error in {context_desc}: {e}. LLM output was likely malformed."
+        )
+        return None
+    except Exception as e:
+        # Catch any other potential errors during the LLM call or parsing
+        logger.error(f"An unexpected error occurred in {context_desc}: {e}")
+        return None
 
 async def process_with_voting(
     items: List[T],

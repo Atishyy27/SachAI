@@ -110,21 +110,29 @@ async def evaluate_evidence_node(state: ClaimVerifierState) -> dict:
             sources=[],
         )
     else:
+        # try:
+        #     result = VerificationResult(response.verdict)
+        # except ValueError:
+        #     logger.warning(
+        #         f"Invalid verdict '{response.verdict}', defaulting to REFUTED"
+        #     )
+        #     result = VerificationResult.REFUTED
         try:
-            result = VerificationResult(response.verdict)
-        except ValueError:
+            result = VerificationResult(response.get("verdict"))
+        except (ValueError, TypeError):
             logger.warning(
-                f"Invalid verdict '{response.verdict}', defaulting to REFUTED"
+                f"Invalid verdict '{response.get('verdict')}', defaulting to REFUTED"
             )
             result = VerificationResult.REFUTED
 
+        influential_indices = response.get("influential_source_indices", [])
         influential_urls = (
             {
                 truncated_evidence[idx - 1].url
-                for idx in response.influential_source_indices
+                for idx in influential_indices
                 if 1 <= idx <= len(truncated_evidence)
             }
-            if response.influential_source_indices
+            if influential_indices
             else set()
         )
 
@@ -144,7 +152,7 @@ async def evaluate_evidence_node(state: ClaimVerifierState) -> dict:
             original_sentence=claim.original_sentence,
             original_index=claim.original_index,
             result=result,
-            reasoning=response.reasoning,
+            reasoning=response.get("reasoning", "No reasoning provided."),
             sources=sources,
         )
 

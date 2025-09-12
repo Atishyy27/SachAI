@@ -5,9 +5,9 @@ Contains settings for the pipeline nodes.
 
 # Node settings
 SELECTION_CONFIG = {
-    "completions": 3,
-    "min_successes": 2,
-    "temperature": 0.2,  # Higher temp for diverse judgments
+    "completions": 1,
+    "min_successes": 1,
+    "temperature": 0.0,  # Higher temp for diverse judgments
 }
 
 DISAMBIGUATION_CONFIG = {

@@ -15,7 +15,7 @@ class VerificationResult(str, Enum):
 
     SUPPORTED = "Supported"
     REFUTED = "Refuted"
-    # INSUFFICIENT_INFORMATION = "Insufficient Information"
+    INSUFFICIENT_INFORMATION = "Insufficient Information"
 
 
 class Evidence(BaseModel):

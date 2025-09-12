@@ -1,0 +1,196 @@
+:root {
+    --background-color: #f8f9fa;
+    --card-background-color: #ffffff;
+    --text-color: #212529;
+    --subtle-text-color: #6c757d;
+    --primary-color: #0d6efd;
+    --border-color: #dee2e6;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #6f42c1;
+    --font-family: 'Inter', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 2rem 1rem;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+header p {
+    font-size: 1rem;
+    color: var(--subtle-text-color);
+}
+
+.card {
+    background-color: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.input-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+textarea {
+    width: 100%;
+    min-height: 100px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0b5ed7;
+}
+
+button:disabled {
+    background-color: #a0c3f0;
+    cursor: not-allowed;
+}
+
+.verification-card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    color: var(--subtle-text-color);
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.step {
+    padding: 0.5rem;
+    transition: color 0.5s ease-in-out;
+}
+.step.active {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.claims-verified-text {
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--subtle-text-color);
+}
+
+.sources-card ul {
+    list-style-type: none;
+    padding: 0;
+}
+.sources-card li {
+    margin-bottom: 1rem;
+}
+.sources-card a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.sources-card a:hover {
+    text-decoration: underline;
+}
+.sources-card p {
+    font-size: 0.9rem;
+    color: var(--subtle-text-color);
+    margin-top: 0.25rem;
+}
+
+.results-bars {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+}
+.bar { height: 100%; }
+.bar-supported { background-color: var(--success-color); }
+.bar-refuted { background-color: var(--danger-color); }
+.bar-insufficient { background-color: var(--warning-color); }
+.bar-conflicting { background-color: var(--info-color); }
+
+.results-legend {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.9rem;
+}
+.legend-item { display: flex; align-items: center; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+
+.processed-answer-card .claim {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    cursor: pointer;
+}
+.claim .verdict {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    color: white;
+}
+.verdict-Supported { background-color: var(--success-color); }
+.verdict-Refuted { background-color: var(--danger-color); }
+.verdict-Insufficient { background-color: var(--warning-color); }
+
+.claim-details {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+.claim-details h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+.claim-details p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--subtle-text-color);
+}
+
+.hidden {
+    display: none;
+}

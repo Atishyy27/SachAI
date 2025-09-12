@@ -77,14 +77,15 @@ async def _decomposition_stage(
     )
 
     # If no claims were found
-    if not response or response.no_claims or not response.claims:
+    # if not response or response.no_claims or not response.claims:
+    if not response or response.get("no_claims") or not response.get("claims"):
         logger.info(f"No claims found in: '{sentence}'")
         return []
 
     logger.debug(f"Decomposition response: {response}")
 
     # Clean up claims and convert to objects
-    claims_texts = [claim.strip() for claim in response.claims if claim.strip()]
+    claims_texts = [claim.strip() for claim in response.get("claims", []) if claim.strip()]
 
     # Get original sentence and index
     original_sentence = disambiguated_item.original_selected_item.original_context_item.original_sentence

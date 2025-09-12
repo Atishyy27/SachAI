@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <div class="header-title">
+            <i data-lucide="search-check" class="title-gradient" style="width: 36px; height: 36px;"></i>
+            <h1 class="title-gradient">Sach AI</h1>
+        </div>
+        <p class="subtitle">
+            LLM-powered factual verification system with claim satisfaction and evidence-based assessment
+        </p>
+    </div>
+
+    <div class="card gradient-card">
+        <div class="card-header">
+            <h2 class="card-title">Check the Fact with SachAI</h2>
+        </div>
+        <div class="card-content">
+            <form id="fact-check-form">
+                <div class="input-group">
+                    <textarea 
+                        id="input-text" 
+                        name="text" 
+                        placeholder="Enter the text you want to fact-check..."
+                        class="textarea"
+                        rows="6"
+                        required
+                    ></textarea>
+                </div>
+                <button type="submit" id="submit-btn" class="btn btn-primary btn-full">
+                    <span id="btn-text">Fact-Check</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Analyzing... This may take a moment.</p>
+    </div>
+
+    <div id="results" class="results hidden">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    Verification
+                    <span id="claims-badge" class="badge">0 claims verified</span>
+                </h3>
+            </div>
+            <div class="card-content">
+                <div class="verification-status" id="verification-status-list">
+                    </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Sources</h3></div>
+            <div class="card-content"><div id="sources-list" class="sources-list"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Verification Results</h3></div>
+            <div class="card-content">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-header"><div class="dot dot-supported"></div><span>Supported</span></div>
+                        <div id="supported-pct" class="stat-value">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-header"><div class="dot dot-refuted"></div><span>Refuted</span></div>
+                        <div id="refuted-pct" class="stat-value">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-header"><div class="dot dot-insufficient"></div><span>Insufficient</span></div>
+                        <div id="insufficient-pct" class="stat-value">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-header"><div class="dot dot-conflicting"></div><span>Conflicting</span></div>
+                        <div id="conflicting-pct" class="stat-value">0%</div>
+                    </div>
+                </div>
+                <div id="progress-bar" class="progress-bar">
+                    <div id="progress-supported" class="progress-segment progress-supported" style="width: 0%"></div>
+                    <div id="progress-refuted" class="progress-segment progress-refuted" style="width: 0%"></div>
+                    <div id="progress-insufficient" class="progress-segment progress-insufficient" style="width: 0%"></div>
+                    <div id="progress-conflicting" class="progress-segment progress-conflicting" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Processed Answer</h3></div>
+            <div class="card-content"><div id="claims-list" class="claims-list"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Fact Check Summary</h3></div>
+            <div class="card-content"><p id="summary-text" class="summary-text"></p></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

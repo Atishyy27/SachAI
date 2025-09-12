@@ -44,11 +44,9 @@ The application requires API keys for the language model and a search provider.
 2.  Add your API keys to the file in the following format (do not use quotes).
 
     ```
-    GROQ_API_KEY=your_groq_api_key
     TAVILY_API_KEY=your_tavily_api_key
     ```
 
-      * Find your Groq API key on the [Groq console](https://console.groq.com/keys).
       * Find your Tavily API key on the [Tavily dashboard](https://www.google.com/search?q=https://tavily.com/dashboard).
 
 ### Step 4: Run the Application

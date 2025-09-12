@@ -75,16 +75,24 @@ async def _single_selection_attempt(
     # If LLM call failed or no verifiable content
     if (
         not selection_response
-        or not selection_response.processed_sentence
-        or selection_response.no_verifiable_claims
+        or not selection_response.get("processed_sentence")
+        or selection_response.get("no_verifiable_claims")
+        # or not selection_response.processed_sentence
+        # or selection_response.no_verifiable_claims
     ):
         return False, None
 
     # Check if we're keeping it as-is or using the processed version
-    if selection_response.remains_unchanged:
+    # if selection_response.remains_unchanged:
+    #     processed = sentence
+    # else:
+    #     processed = selection_response.processed_sentence.strip()
+
+    if selection_response.get("remains_unchanged"):
         processed = sentence
     else:
-        processed = selection_response.processed_sentence.strip()
+        # Provide a default empty string to .get() to prevent errors
+        processed = selection_response.get("processed_sentence", "").strip()
 
     return True, processed
 

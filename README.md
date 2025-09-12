@@ -15,7 +15,6 @@ The core of sachAI is its agent-based pipeline, which breaks down complex tasks 
 * **Python:** The core programming language for the application.
 * **LangGraph:** A powerful library for building and orchestrating stateful, multi-step agentic workflows.
 * **Streamlit:** Used to create the user-friendly, interactive web interface.
-* **Groq:** Provides the high-speed language model inference for the agents.
 * **Tavily:** The search API that provides up-to-date, relevant evidence.
 
 ## Setup and Installation

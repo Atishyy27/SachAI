@@ -2,7 +2,12 @@ huggingface-hub
 langchain
 langchain-core
 langchain-exa
-langchain-groq
+# langchain-groq
+langchain-community
+langchain-ollama
+ollama
+flask
+
 langgraph
 langgraph-checkpoint-postgres
 langgraph-sdk
@@ -20,3 +25,6 @@ transformers
 uvicorn
 starlette
 langchain-tavily
+
+pyfiglet
+"typer[all]" rich

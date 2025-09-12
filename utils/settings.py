@@ -5,11 +5,11 @@ from pydantic import AfterValidator, Field, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-def _validate_groq_api_key(v: str | None) -> str | None:
-    """Validate that the Groq API key starts with 'gsk_'."""
-    if v and not v.startswith("gsk_"):
-        raise ValueError("Groq API key must start with 'gsk_'")
-    return v
+# def _validate_groq_api_key(v: str | None) -> str | None:
+#     """Validate that the Groq API key starts with 'gsk_'."""
+#     if v and not v.startswith("gsk_"):
+#         raise ValueError("Groq API key must start with 'gsk_'")
+    # return v
 
 
 def _validate_exa_api_key(v: str | None) -> str | None:
@@ -29,7 +29,7 @@ def _validate_tavily_api_key(v: str | None) -> str | None:
     return v
 
 
-GroqAPIKey = Annotated[str | None, AfterValidator(_validate_groq_api_key)]
+# GroqAPIKey = Annotated[str | None, AfterValidator(_validate_groq_api_key)]
 ExaAPIKey = Annotated[str | None, AfterValidator(_validate_exa_api_key)]
 TavilyAPIKey = Annotated[str | None, AfterValidator(_validate_tavily_api_key)]
 
@@ -37,7 +37,7 @@ TavilyAPIKey = Annotated[str | None, AfterValidator(_validate_tavily_api_key)]
 class Settings(BaseSettings):
     """Manages application settings and environment variables."""
 
-    groq_api_key: GroqAPIKey = Field(default=None, alias="GROQ_API_KEY")
+    # groq_api_key: GroqAPIKey = Field(default=None, alias="GROQ_API_KEY")
     exa_api_key: ExaAPIKey = Field(default=None, alias="EXA_API_KEY")
     tavily_api_key: TavilyAPIKey = Field(default=None, alias="TAVILY_API_KEY")
     redis_uri: RedisDsn = Field(default="redis://localhost:6379", alias="REDIS_URL")
