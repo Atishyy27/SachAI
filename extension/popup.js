@@ -3,18 +3,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const factCheckBtn = document.getElementById('fact-check-btn');
     const resultsContainer = document.getElementById('results-container');
     const loader = document.getElementById('loader');
-
-    // API endpoint for the local backend
     const API_URL = 'http://127.0.0.1:8000/fact-check';
+
+    // --- NEW: Check if text was sent from the right-click menu ---
+    chrome.storage.local.get(['selectedText'], (result) => {
+        if (result.selectedText) {
+            textInput.value = result.selectedText;
+            // Clear the stored text so it's not used again
+            chrome.storage.local.remove('selectedText');
+            // Automatically start the fact-check
+            factCheckBtn.click();
+        }
+    });
 
     factCheckBtn.addEventListener('click', async () => {
         const text = textInput.value.trim();
         if (!text) {
-            resultsContainer.innerHTML = '<p class="error">Please enter some text to analyze.</p>';
+            resultsContainer.innerHTML = '<p class="error">Please enter text to analyze.</p>';
             return;
         }
 
-        // Show loader and clear previous results
         loader.classList.remove('hidden');
         resultsContainer.innerHTML = '';
         factCheckBtn.disabled = true;
@@ -22,50 +30,41 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: text }),
+                headers: { 'Content-Type': 'application/json' },
+                // --- FIX: Use 'answer' to match your Python server ---
+                body: JSON.stringify({ "answer": text }),
             });
 
             if (!response.ok) {
                 throw new Error(`API Error: ${response.status} ${response.statusText}`);
             }
-
             const report = await response.json();
             displayResults(report);
 
         } catch (error) {
             console.error('Error during fact-check:', error);
-            resultsContainer.innerHTML = `<p class="error">An error occurred. Make sure the Python backend server is running. <br><br>Details: ${error.message}</p>`;
+            resultsContainer.innerHTML = `<p class="error">An error occurred. Make sure your Python server is running.<br><br>Details: ${error.message}</p>`;
         } finally {
-            // Hide loader and re-enable button
             loader.classList.add('hidden');
             factCheckBtn.disabled = false;
         }
     });
 
-    /**
-     * Renders the fact-checking report in the UI.
-     * @param {object} report - The final report from the API.
-     */
     function displayResults(report) {
         if (!report || !report.verified_claims) {
-            resultsContainer.innerHTML = '<p class="error">Received an invalid report from the server.</p>';
+            resultsContainer.innerHTML = '<p class="error">Received an invalid report.</p>';
             return;
         }
 
-        let html = `<h2>Overall Verdict</h2><p>${report.summary}</p>`;
-        html += '<h2>Individual Claims</h2>';
-
+        let html = `<h2>Overall Verdict</h2><p>${report.summary}</p><h2>Individual Claims</h2>`;
         if (report.verified_claims.length === 0) {
-            html += '<p>No verifiable claims were found in the text.</p>';
+            html += '<p>No verifiable claims were found.</p>';
         } else {
             report.verified_claims.forEach((verdict, index) => {
-                const verdictClass = verdict.result.toLowerCase(); // 'supported' or 'refuted'
+                const verdictClass = verdict.result.toLowerCase().split(' ')[0];
                 html += `
                     <div class="claim-card">
-                        <details>
+                        <details open>
                             <summary>
                                 <span class="verdict-badge ${verdictClass}">${verdict.result}</span>
                                 <strong>Claim ${index + 1}:</strong> ${verdict.claim_text}
@@ -84,20 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.innerHTML = html;
     }
 
-    /**
-     * Formats the list of sources into an HTML string.
-     * @param {Array} sources - List of source objects.
-     * @returns {string} - HTML string of sources.
-     */
     function formatSources(sources) {
-        if (!sources || sources.length === 0) {
-            return '<p>No sources were found for this claim.</p>';
-        }
-
+        if (!sources || sources.length === 0) return '<p>No sources were found.</p>';
         return sources.map(source => `
             <div class="source ${source.is_influential ? 'influential' : ''}">
-                <a href="${source.url}" target="_blank">${source.title || 'Source Link'}</a>
-                <p class="snippet">${source.text.substring(0, 150)}...</p>
+                <a href="${source.url}" target="_blank">${source.title || 'Source'}</a>
+                <p class="snippet">${source.text ? source.text.substring(0, 150) + '...' : ''}</p>
             </div>
         `).join('');
     }

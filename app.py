@@ -28,12 +28,14 @@ def fact_check():
     """Handles the API request from the frontend's JavaScript."""
     try:
         data = request.get_json()
+        
+        # --- FIX: Make sure we are getting the key 'text' ---
         text = data.get('text', '').strip()
         
         if not text:
             return jsonify({'error': 'Please provide text to analyze.'}), 400
         
-        # Runs your entire asynchronous fact-checking pipeline
+        # Run the async agent logic
         final_state = asyncio.run(run_agent(text))
         
         final_report = final_state.get("final_report")
@@ -41,7 +43,7 @@ def fact_check():
         if not final_report:
             return jsonify({'error': 'Failed to generate a complete report.'}), 500
         
-        # Converts your final report into a JSON-friendly format for the frontend
+        # Convert the report into a JSON-friendly format
         response_data = {
             'summary': final_report.summary,
             'verified_claims': [claim.dict() for claim in final_report.verified_claims],
@@ -56,8 +58,7 @@ def fact_check():
 
 async def run_agent(text):
     """Wrapper to run your async LangGraph agent."""
-    # --- THIS IS THE ONE-WORD FIX ---
-    # The graph expects the input key to be 'answer'.
+    # The graph itself expects the key to be 'answer'
     inputs = {"answer": text} 
     final_state = await graph.ainvoke(inputs)
     return final_state
